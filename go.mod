@@ -1,4 +1,4 @@
-module github.com/cacticloud/caddy-trace-id
+module github.com/cacticloud/caddy-request-id
 
 go 1.22.0
 
