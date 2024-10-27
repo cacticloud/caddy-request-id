@@ -6,7 +6,6 @@ import (
 	"net/http"
 	"time"
 
-	_ "github.com/cacticloud/caddy-request-id"
 	"github.com/caddyserver/caddy/v2"
 	"github.com/caddyserver/caddy/v2/modules/caddyhttp"
 )
