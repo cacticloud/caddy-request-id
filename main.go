@@ -1,7 +1,8 @@
-package caddyrequestid
+package caddytraceid
 
 import (
 	"fmt"
+	"log"
 	"math/rand"
 	"net/http"
 	"time"
@@ -12,23 +13,24 @@ import (
 
 func init() {
 	rand.Seed(time.Now().UnixNano()) // 初始化随机种子
-	caddy.RegisterModule(RequestID{})
+	caddy.RegisterModule(TraceID{})
 }
 
-type RequestID struct{}
+type TraceID struct{}
 
 // CaddyModule 返回 Caddy 模块的信息。
-func (RequestID) CaddyModule() caddy.ModuleInfo {
+func (TraceID) CaddyModule() caddy.ModuleInfo {
 	return caddy.ModuleInfo{
-		ID:  "http.handlers.request_id",
-		New: func() caddy.Module { return new(RequestID) },
+		ID:  "http.handlers.trace_id",
+		New: func() caddy.Module { return new(TraceID) },
 	}
 }
 
-func (reqID RequestID) ServeHTTP(w http.ResponseWriter, r *http.Request, next caddyhttp.Handler) error {
-	uniqueID := generateUniqueID()         // 生成唯一 ID
-	r.Header.Set("X-Request-ID", uniqueID) // 设置请求头
-	return next.ServeHTTP(w, r)            // 继续执行下一个处理器
+func (trace TraceID) ServeHTTP(w http.ResponseWriter, r *http.Request, next caddyhttp.Handler) error {
+	log.Println("RequestID middleware is called.")
+	uniqueID := generateUniqueID()       // 生成唯一 ID
+	r.Header.Set("X-Trace-ID", uniqueID) // 设置请求头
+	return next.ServeHTTP(w, r)          // 继续执行下一个处理器
 }
 
 // generateUniqueID 使用当前时间和一个随机数生成一个唯一的 ID。
@@ -38,5 +40,5 @@ func generateUniqueID() string {
 }
 
 var (
-	_ caddyhttp.MiddlewareHandler = (*RequestID)(nil)
+	_ caddyhttp.MiddlewareHandler = (*TraceID)(nil)
 )
