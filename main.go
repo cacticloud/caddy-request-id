@@ -11,13 +11,13 @@ import (
 )
 
 func init() {
+	rand.Seed(time.Now().UnixNano()) // 初始化随机种子
 	caddy.RegisterModule(RequestID{})
 }
 
-// RequestID is a Caddy module that adds a unique request ID to each request.
 type RequestID struct{}
 
-// CaddyModule returns the Caddy module information.
+// CaddyModule 返回 Caddy 模块的信息。
 func (RequestID) CaddyModule() caddy.ModuleInfo {
 	return caddy.ModuleInfo{
 		ID:  "http.handlers.request_id",
@@ -25,25 +25,18 @@ func (RequestID) CaddyModule() caddy.ModuleInfo {
 	}
 }
 
-// ServeHTTP implements caddyhttp.MiddlewareHandler.
-func (r RequestID) ServeHTTP(w http.ResponseWriter, r *http.Request, next caddyhttp.Handler) error {
-	// Generate a unique ID based on the current time and a random component.
-	uniqueID := generateUniqueID()
-	// Set the X-Request-ID header with the unique ID.
-	r.Header.Set("X-Request-ID", uniqueID)
-
-	// Call the next handler in the chain.
-	return next.ServeHTTP(w, r)
+func (reqID RequestID) ServeHTTP(w http.ResponseWriter, r *http.Request, next caddyhttp.Handler) error {
+	uniqueID := generateUniqueID()         // 生成唯一 ID
+	r.Header.Set("X-Request-ID", uniqueID) // 设置请求头
+	return next.ServeHTTP(w, r)            // 继续执行下一个处理器
 }
 
-// generateUniqueID creates a unique ID using a combination of time and a random number.
+// generateUniqueID 使用当前时间和一个随机数生成一个唯一的 ID。
 func generateUniqueID() string {
 	now := time.Now()
 	return fmt.Sprintf("%d%06d", now.UnixNano(), rand.Intn(999999))
 }
 
-// Interface guards
 var (
 	_ caddyhttp.MiddlewareHandler = (*RequestID)(nil)
-	_ caddy.Provisioner           = (*RequestID)(nil)
 )
