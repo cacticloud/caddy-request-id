@@ -1,4 +1,4 @@
-package caddytraceid
+package caddyrequestid
 
 import (
 	"fmt"
